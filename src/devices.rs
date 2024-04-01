@@ -1,4 +1,4 @@
-trait SmartPlug  {
+trait SmartSocket  {
     fn get_info(){
     todo!()
     }
