@@ -1,8 +1,9 @@
+#[derive(Debug, Clone)]
 pub struct SmartThermometer {
-    pub name: String
+    pub name: String,
 }
- impl SmartThermometer  {
-    fn get_temperature() -> f32{
+impl SmartThermometer {
+    fn get_temperature() -> f32 {
         0.0
     }
 }

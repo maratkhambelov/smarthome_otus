@@ -4,21 +4,20 @@ pub struct SmartSocket {
 
 enum Status {
     ENABLED,
-    DISABLED
+    DISABLED,
 }
 
-
-impl SmartSocket  {
-    fn get_info(&self) -> &str{
+impl SmartSocket {
+    fn get_info(&self) -> &str {
         &self.name
     }
     fn get_power_consumption() -> f64 {
         0.0
     }
-    fn on(){
+    fn on() {
         todo!()
     }
-    fn off(){
+    fn off() {
         todo!()
     }
 }
