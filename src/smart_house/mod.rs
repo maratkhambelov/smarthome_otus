@@ -16,14 +16,31 @@ impl<T: Device> Room<T> {
         Room { name, devices }
     }
 
-    pub fn add_device(&mut self, device: T) {
-        self.devices.push(device)
+    pub fn get_name(&self) -> String {
+        self.name.to_string()
     }
 
     pub fn get_devices(&self) -> &Vec<T> {
         &self.devices
     }
+
+    pub fn add_device(&mut self, device: T) {
+        self.devices.push(device)
+    }
+
+    pub fn remove_device(&mut self, name: String) -> Option<T> {
+        if let Some(index) = self
+            .devices
+            .iter()
+            .position(|device| device.get_name() == name)
+        {
+            Some(self.devices.remove(index))
+        } else {
+            None
+        }
+    }
 }
+
 #[derive(Debug)]
 pub struct SmartHouse {
     name: String,
@@ -55,6 +72,22 @@ impl SmartHouse {
 
     pub fn get_room(&self, room_name: String) -> Option<&Room<Box<dyn Device>>> {
         self.rooms.iter().find(|room| room.name == room_name)
+    }
+
+    pub fn add_room(&mut self) {
+        let house_name = self.name.clone();
+        self.rooms.push(Room {
+            name: format!("{}_{}_ROOM", house_name, self.rooms.len() + 1),
+            devices: vec![],
+        })
+    }
+
+    pub fn remove_room(&mut self, name: String) -> Option<Room<Box<dyn Device>>> {
+        if let Some(index) = self.rooms.iter().position(|device| device.name == name) {
+            Some(self.rooms.remove(index))
+        } else {
+            None
+        }
     }
 
     pub fn get_device(
@@ -130,6 +163,29 @@ mod tests {
         assert_eq!(room.devices[0].get_name(), device.get_name());
     }
 
+    #[test]
+    fn test_delete_device() {
+        let mut room = Room::new("Living Room".to_string(), vec![]);
+        room.add_device(MockDevice::new("Test Device"));
+        let first_device = room
+            .get_devices()
+            .first()
+            .iter()
+            .map(|device| device.get_name())
+            .next();
+
+        if let Some(name) = first_device {
+            let mut amount = room.get_devices().len();
+            let mut expected_amount = 1;
+            assert_eq!(expected_amount, amount);
+            room.remove_device(name.to_string());
+            amount = room.get_devices().len();
+            expected_amount = 0;
+            assert_eq!(expected_amount, amount);
+        } else {
+            panic!("There is not device in room");
+        }
+    }
     #[test]
     fn test_get_devices() {
         let room: Room<MockDevice> =
@@ -232,5 +288,47 @@ mod tests {
         let result = house.get_device(expected_room_name, device_name);
         assert!(result.is_err());
         assert_eq!(result.err(), Some(GetDataError::DeviceNotFound));
+    }
+    #[test]
+    fn test_add_room() {
+        let mut house: SmartHouse = SmartHouse::new(OWNER_NAME.to_string(), vec![]);
+        let initial_amount_rooms: usize = house.get_rooms().len();
+        let mut expected_amount_rooms = 0;
+        assert_eq!(expected_amount_rooms, initial_amount_rooms);
+        house.add_room();
+        let amount_rooms = house.get_rooms().len();
+        expected_amount_rooms = 1;
+        assert_eq!(expected_amount_rooms, amount_rooms);
+    }
+    #[test]
+    fn test_delete_room() {
+        let device_a = "DEVICE_A".to_string();
+        let mut house = SmartHouse::new(
+            OWNER_NAME.to_string(),
+            vec![
+                vec![Box::new(MockDevice {
+                    name: String::from(device_a.clone()),
+                })],
+                vec![],
+            ],
+        );
+
+        let first_room_name = house
+            .get_rooms()
+            .first()
+            .iter()
+            .map(|room| room.get_name())
+            .next();
+        if let Some(name) = first_room_name {
+            let mut amount_rooms: usize = house.get_rooms().len();
+            let mut expected_amount_rooms = 2;
+            assert_eq!(expected_amount_rooms, amount_rooms);
+            house.remove_room(name);
+            amount_rooms = house.get_rooms().len();
+            expected_amount_rooms = 1;
+            assert_eq!(expected_amount_rooms, amount_rooms);
+        } else {
+            panic!("There is no rooms in the house");
+        }
     }
 }

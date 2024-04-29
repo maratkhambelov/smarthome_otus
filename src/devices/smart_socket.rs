@@ -3,8 +3,8 @@ pub struct SmartSocket {
 }
 
 enum Status {
-    ENABLED,
-    DISABLED,
+    Enabled,
+    Disabled,
 }
 
 impl SmartSocket {
